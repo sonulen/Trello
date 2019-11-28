@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:layout_gravity="center"
+tools:context=".Activity.LoginActivity">
+
+<LinearLayout
+    android:id="@+id/ui_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tw_hello_neo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/hello_neo" />
+
+    <Button style="@style/Widget.AppCompat.Button.Colored"
+        android:id="@+id/btn_auth_trello"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_sign" />
+</LinearLayout>
+
+<ImageView
+    android:id="@+id/iv_trello_logo"
+    android:layout_width="198dp"
+    android:layout_height="48dp"
+    android:layout_gravity="bottom|center_horizontal"
+    android:layout_marginBottom="20dp"
+    android:baselineAlignBottom="false"
+    android:clickable="false"
+    app:srcCompat="@drawable/ic_trello_logo_blue"
+    android:visibility="visible" />
+
+<WebView
+    android:id="@+id/trello_webview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="invisible"></WebView>
+
+</FrameLayout>

@@ -1,10 +1,11 @@
-package com.example.trello
+package com.example.trello.Activity
 
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.example.trello.R
 
 import kotlinx.android.synthetic.main.activity_main.*
 
