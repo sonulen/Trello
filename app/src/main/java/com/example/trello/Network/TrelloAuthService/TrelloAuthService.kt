@@ -27,11 +27,19 @@ class TrelloAuthService(
 
     private lateinit var service : OAuthService ///< Сервис для oAuth1
     private val CALLBACK_URL: String = REST_CALLBACK_URL
+
     private lateinit var authorizationUrl : String
 
     @Volatile private var serviceInited: Boolean = false
 
-    private var oAuthVerifer: String = ""
+    // Данные которые нужны для последующих запросов
+
+    val CONSUMER_KEY: String = REST_CONSUMER_KEY ///< Ключ приложения
+    var oAuthVerifer: String = "" ///< Verifer полученный от Trello
+        get() = field
+        private set(value) {
+            field = value
+        }
 
     init {
         GlobalScope.launch {

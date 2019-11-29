@@ -1,27 +1,48 @@
 package com.example.trello.Activity
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.example.trello.Application.TrelloApplication
+import com.example.trello.DI.ActivityComponent.ActivityComponent
+import com.example.trello.Fragments.Boards.Boards
 import com.example.trello.R
-
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_home.*
 
 class HomeActivity : AppCompatActivity() {
 
+    lateinit var activityComponent: ActivityComponent
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        // Для активити (если его еще нет) создадим ActivityComponent
+        activityComponent = TrelloApplication.get(this).getActivityComponent()
+
+        // Если загружаемся первый раз загружем фрагмент со всеми досками
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_placeholder,
+                    Boards.newInstance(activityComponent.getTrelloClient())
+                )
+                .commit()
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // Если activity уничтожают то и компонент тоже надо убить
+        if (isFinishing) {
+            TrelloApplication.get(this).destroyActivityComponent()
+        }
+    }
+
+
+
+    // MENU
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)

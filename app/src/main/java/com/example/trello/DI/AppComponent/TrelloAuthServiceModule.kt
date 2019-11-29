@@ -8,7 +8,7 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 @Module(includes = [TrelloApiModule::class])
-class TrelloAuthModule {
+class TrelloAuthServiceModule {
     @Provides
     @Singleton
     fun getTrelloAuthService(

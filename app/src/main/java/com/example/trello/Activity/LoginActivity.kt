@@ -46,6 +46,7 @@ class LoginActivity : AppCompatActivity() {
                 AuthState.CONNECTING -> hideUI()
                 AuthState.CONNECTED -> processSuccessConnected()
                 AuthState.FAILED -> processFailedConnected()
+                else -> showUI()
             }
         })
 

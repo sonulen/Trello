@@ -6,7 +6,7 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
-@Module(includes = [TrelloAuthModule::class])
+@Module(includes = [TrelloAuthServiceModule::class])
 class TrelloAuthServiceViewModelFactoryModule {
     @Provides
     @Singleton
