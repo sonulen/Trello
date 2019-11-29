@@ -1,16 +1,21 @@
 package com.example.trello.Network.TrelloAuthService
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 import android.net.Uri
 import android.webkit.WebView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.TrelloApi
 import org.scribe.oauth.OAuthService
 
+enum class AuthState {
+    NONE,
+    CONNECTING,
+    CONNECTED,
+    FAILED
+}
 
 class TrelloAuthService(
     REST_API_INSTANCE: TrelloApi,
@@ -18,12 +23,15 @@ class TrelloAuthService(
     REST_CONSUMER_SECRET: String,
     REST_CALLBACK_URL: String
 ) {
-    // Сервис для oAuth1
-    private lateinit var service : OAuthService
+    private var state = MutableLiveData<AuthState>(AuthState.NONE)
+
+    private lateinit var service : OAuthService ///< Сервис для oAuth1
     private val CALLBACK_URL: String = REST_CALLBACK_URL
     private lateinit var authorizationUrl : String
 
     @Volatile private var serviceInited: Boolean = false
+
+    private var oAuthVerifer: String = ""
 
     init {
         GlobalScope.launch {
@@ -39,34 +47,44 @@ class TrelloAuthService(
 
             authorizationUrl = service.getAuthorizationUrl(requestToken) + "&name=Trello&scope=read,write"
 
-            // Получили Url все окей, можно работать
             serviceInited = true
         }
     }
 
-    fun connect(wbV: WebView? = null): Boolean {
+    fun getState() : LiveData<AuthState> = state
 
-        if (!serviceInited) {
-            return false
-        }
+    fun connect(wbV: WebView) {
+        // Отобразим встроенный браузер
+        wbV.settings.javaScriptEnabled = true
+        var client = TrelloAppWebViewClient(CALLBACK_URL, this::handlerForAnswerUri)
+        wbV.webViewClient = client
 
-        // В VM надо будет сделать STATE типо CONNECTING FAILED SUCCESS
-
-        if (wbV != null) {
-            // Отобразим встроенный браузер
-            wbV.settings.javaScriptEnabled = true
-            wbV.webViewClient = MyAppWebViewClient(CALLBACK_URL)
+        if (serviceInited) {
             wbV.loadUrl(authorizationUrl)
+            state.value = AuthState.CONNECTING
         } else {
-            try {
-                val myIntent = Intent(Intent.ACTION_VIEW, Uri.parse(authorizationUrl))
-                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_MULTIPLE_TASK)
-            } catch (e: ActivityNotFoundException) {
-            }
+            state.value = AuthState.FAILED
         }
-
-        // Не должны мы доходить до сюда
-        // Через Intent должны открыть другую Activity
-        return false
     }
+
+    private fun handlerForAnswerUri(uri: Uri) {
+        parseUri(uri)
+    }
+
+    fun parseUri(uri: Uri) {
+        val oauth_token = uri.getQueryParameter("oauth_token")
+        val oauth_verifier = uri.getQueryParameter("oauth_verifier")
+        if (oauth_token != null && oauth_verifier != null) {
+            saveVerifer(oauth_verifier)
+        } else {
+            state.value = AuthState.FAILED
+        }
+    }
+
+    private fun saveVerifer(oauthVerifier: String) {
+        oAuthVerifer = oauthVerifier
+        state.value = AuthState.CONNECTED
+    }
+
+
 }

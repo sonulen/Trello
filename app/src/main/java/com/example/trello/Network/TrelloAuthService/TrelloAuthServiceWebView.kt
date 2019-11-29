@@ -4,11 +4,12 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.example.trello.Activity.LoginActivity
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 // Кастомный WebView чтобы авторизоваться в трелло
-class MyAppWebViewClient(REST_CALLBACK_URL: String) : WebViewClient() {
-    private val REST_CALLBACK_URL: String = REST_CALLBACK_URL
+class TrelloAppWebViewClient(private val REST_CALLBACK_URL: String,
+                             private val handler: (uri: Uri) -> Unit ) : WebViewClient() {
 
     override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         val host = Uri.parse(url).host
@@ -16,20 +17,19 @@ class MyAppWebViewClient(REST_CALLBACK_URL: String) : WebViewClient() {
             return false
         }
 
-        // Любой путь на наш хост переведем на LoginActivity
+        // Любой путь на наш хост переведем на handler
         val fullpath = Uri.parse(url).scheme + "://" + Uri.parse(url).host
         if(fullpath.endsWith(REST_CALLBACK_URL)) {
-            view.goBack()
-            val intent = Intent(view.context, LoginActivity::class.java)
-            intent.data = Uri.parse(url)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            view.context.startActivity(intent)
+            handler(Uri.parse(url))
+            // Т.к. уходим с webView удалим историю
+            view.loadUrl("about:blank")
+            view.clearHistory()
             return false
         }
 
-        // view.goBack() сделал из-за того что когда мы делаем back
-        // с браузера попадать на корректную страницу (иначе там белый экран)
-        view.goBack()
+        // Т.к. уходим с webView удалим историю
+        view.loadUrl("about:blank")
+        view.clearHistory()
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         view.context.startActivity(intent)
         return true
