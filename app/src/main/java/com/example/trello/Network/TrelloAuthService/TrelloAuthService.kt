@@ -1,11 +1,16 @@
 package com.example.trello.Network.TrelloAuthService
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+import android.net.Uri
 import android.webkit.WebView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.TrelloApi
 import org.scribe.oauth.OAuthService
+
 
 class TrelloAuthService(
     REST_API_INSTANCE: TrelloApi,
@@ -53,8 +58,11 @@ class TrelloAuthService(
             wbV.webViewClient = MyAppWebViewClient(CALLBACK_URL)
             wbV.loadUrl(authorizationUrl)
         } else {
-            // Бросим Intent на открытие браузера
-            // TODO
+            try {
+                val myIntent = Intent(Intent.ACTION_VIEW, Uri.parse(authorizationUrl))
+                myIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_MULTIPLE_TASK)
+            } catch (e: ActivityNotFoundException) {
+            }
         }
 
         // Не должны мы доходить до сюда

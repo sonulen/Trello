@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.example.trello.Activity.LoginActivity
 
 // Кастомный WebView чтобы авторизоваться в трелло
 class MyAppWebViewClient(REST_CALLBACK_URL: String) : WebViewClient() {
