@@ -10,7 +10,7 @@ class TrelloHttpOkInterceptor(val authService: TrelloAuthService) : Interceptor 
     override fun intercept(chain: Interceptor.Chain): Response {
         val url = chain.request().url.newBuilder()
             .addQueryParameter("key", authService.CONSUMER_KEY)
-            .addQueryParameter("token", authService.oAuthVerifer)
+            .addQueryParameter("token", authService.ACCESS_TOKEN)
             .build()
 
         val request = chain.request().newBuilder()

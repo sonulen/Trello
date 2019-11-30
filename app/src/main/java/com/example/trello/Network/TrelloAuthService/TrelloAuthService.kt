@@ -4,10 +4,13 @@ import android.net.Uri
 import android.webkit.WebView
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.TrelloApi
+import org.scribe.model.Verifier
 import org.scribe.oauth.OAuthService
 
 enum class AuthState {
@@ -32,10 +35,13 @@ class TrelloAuthService(
 
     @Volatile private var serviceInited: Boolean = false
 
+    private var oAuthVerifer: String = "" ///< Verifer полученный от Trello
+
+
     // Данные которые нужны для последующих запросов
 
     val CONSUMER_KEY: String = REST_CONSUMER_KEY ///< Ключ приложения
-    var oAuthVerifer: String = "" ///< Verifer полученный от Trello
+    var ACCESS_TOKEN: String = ""   ///< Токен доступа
         get() = field
         private set(value) {
             field = value
@@ -91,7 +97,13 @@ class TrelloAuthService(
 
     private fun saveVerifer(oauthVerifier: String) {
         oAuthVerifer = oauthVerifier
-        state.value = AuthState.CONNECTED
+
+        GlobalScope.launch {
+            ACCESS_TOKEN = service.getAccessToken(service.requestToken, Verifier(oAuthVerifer)).token
+            withContext(Dispatchers.Main) {
+                state.value = AuthState.CONNECTED
+            }
+        }
     }
 
 
