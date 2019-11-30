@@ -12,14 +12,17 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.trello.Application.TrelloApplication
 import com.example.trello.Network.TrelloAuthService.AuthState
-import com.example.trello.R
 import com.example.trello.ViewModels.TrelloAuthService.TrelloAuthServiceViewModel
 import com.example.trello.ViewModels.TrelloAuthService.TrelloAuthServiceViewModelFactory
 import kotlinx.android.synthetic.main.activity_login.*
 import javax.inject.Inject
 
+val EXTRAS_NAME_TO_REMOVE_ACCESS_TOKEN = "REMOVE_ACCESS_TOKEN"
 
 class LoginActivity : AppCompatActivity() {
+
+    private val APP_NAME = "Trello"
+    private val KEY_NAME_ACCESS_TOKEN = "ACCESS_TOKEN"
 
     @Inject
     lateinit var trelloAuthServiceViewModelFactory : TrelloAuthServiceViewModelFactory
@@ -41,6 +44,15 @@ class LoginActivity : AppCompatActivity() {
 
         trelloAuthServiceViewModel = ViewModelProviders
             .of(this,trelloAuthServiceViewModelFactory)[TrelloAuthServiceViewModel::class.java]
+
+        // Это сделанно для сценария
+        // Когда с HomeActivity нажмут LogOut сюда должен прилететь Intent
+        // С параметром EXTRAS_NAME_TO_REMOVE_ACCESS_TOKEN и значением true
+        intent.extras?.let{
+            if (it.getString(EXTRAS_NAME_TO_REMOVE_ACCESS_TOKEN) == "true") {
+                removeTokenFromSharedPreference()
+            }
+        }
 
         trelloAuthServiceViewModel.getState().observe(this, Observer {
             when(it) {
@@ -72,17 +84,23 @@ class LoginActivity : AppCompatActivity() {
 
     private fun saveToken(accessToken: String) {
         val preferences: SharedPreferences =
-            this.getSharedPreferences("Trello", Context.MODE_PRIVATE)
-        preferences.edit().putString("ACCESS_TOKEN", accessToken).apply()
+            this.getSharedPreferences(APP_NAME, Context.MODE_PRIVATE)
+        preferences.edit().putString(KEY_NAME_ACCESS_TOKEN, accessToken).apply()
     }
 
     private fun checkSharedPreference() {
         val preferences: SharedPreferences =
-            this.getSharedPreferences("Trello", Context.MODE_PRIVATE)
-        val retrivedToken = preferences.getString("ACCESS_TOKEN", null)
+            this.getSharedPreferences(APP_NAME, Context.MODE_PRIVATE)
+        val retrivedToken = preferences.getString(KEY_NAME_ACCESS_TOKEN, null)
         retrivedToken?.let {
             trelloAuthServiceViewModel.updateToken(it)
         }
+    }
+
+    private fun removeTokenFromSharedPreference() {
+        val preferences: SharedPreferences =
+            this.getSharedPreferences(APP_NAME, Context.MODE_PRIVATE)
+        preferences.edit().remove(KEY_NAME_ACCESS_TOKEN).commit()
     }
 
     fun showUI() {
