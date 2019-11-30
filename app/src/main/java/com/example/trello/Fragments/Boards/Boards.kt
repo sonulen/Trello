@@ -71,7 +71,7 @@ class Boards : Fragment(), onBoardSelectionListener {
         repositoryViewModel.getState().observe(this, Observer {
             when(it) {
                 RepostirotyState.LOADING -> {
-                    view.swiperefresh.isRefreshing = true
+
                 }
                 RepostirotyState.UPDATED -> {
                     view.swiperefresh.isRefreshing = false

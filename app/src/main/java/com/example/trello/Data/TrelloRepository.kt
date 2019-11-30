@@ -49,7 +49,7 @@ class TrelloRepository(private val client: TrelloClient) {
         // С генерируем пустой пока список
         updateList()
         // Начнём загрузку всех данных
-        updateAllData()
+        requestAllData()
     }
 
     /**
@@ -105,7 +105,8 @@ class TrelloRepository(private val client: TrelloClient) {
      * Функция инициализирующая загрузку всех данных с Trello
      */
     @SuppressLint("CheckResult")
-    fun updateAllData() {
+    fun requestAllData() {
+        state.value = RepostirotyState.LOADING
         // Грузим данные от trello. Начнём с организаций
         client.loadOrganization()
             .subscribeOn(Schedulers.io())
@@ -122,6 +123,8 @@ class TrelloRepository(private val client: TrelloClient) {
      */
     @SuppressLint("CheckResult")
     fun requestBoards() {
+        state.value = RepostirotyState.LOADING
+
         client.loadBoardList()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -137,6 +140,8 @@ class TrelloRepository(private val client: TrelloClient) {
      */
     @SuppressLint("CheckResult")
     fun requestCards(idBoard: String) {
+        state.value = RepostirotyState.LOADING
+
         // Загрузим для доски все карточки теперь и распихаем по столбцам
         client.loadCardsListOfBoard(idBoard)
             .subscribeOn(Schedulers.io())

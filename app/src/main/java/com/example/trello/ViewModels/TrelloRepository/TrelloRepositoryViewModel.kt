@@ -64,6 +64,6 @@ class TrelloRepositoryViewModel
     }
 
     fun refresh() {
-        repository.updateAllData()
+        repository.requestAllData()
     }
 }
