@@ -108,5 +108,9 @@ class TrelloAuthService(
         state.value = AuthState.CONNECTED
     }
 
+    fun reset() {
+        state.value = AuthState.NONE
+        ACCESS_TOKEN = ""
+    }
 
 }

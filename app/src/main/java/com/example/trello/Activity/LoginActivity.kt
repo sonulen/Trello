@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.trello.Application.TrelloApplication
 import com.example.trello.Network.TrelloAuthService.AuthState
+import com.example.trello.R
 import com.example.trello.ViewModels.TrelloAuthService.TrelloAuthServiceViewModel
 import com.example.trello.ViewModels.TrelloAuthService.TrelloAuthServiceViewModelFactory
 import kotlinx.android.synthetic.main.activity_login.*
@@ -57,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
         trelloAuthServiceViewModel.getState().observe(this, Observer {
             when(it) {
                 AuthState.NONE -> {
+                    showLoadingImage()
                     checkSharedPreference()
                     showUI()
                 }
@@ -100,22 +102,34 @@ class LoginActivity : AppCompatActivity() {
     private fun removeTokenFromSharedPreference() {
         val preferences: SharedPreferences =
             this.getSharedPreferences(APP_NAME, Context.MODE_PRIVATE)
+        trelloAuthServiceViewModel.reset()
         preferences.edit().remove(KEY_NAME_ACCESS_TOKEN).commit()
     }
 
+    fun showLoadingImage() {
+        loading_image.visibility = View.VISIBLE
+        ui_layout.visibility = View.INVISIBLE
+        iv_trello_logo.visibility = View.INVISIBLE
+        trello_webview.visibility = View.INVISIBLE
+
+    }
+
     fun showUI() {
+        loading_image.visibility = View.INVISIBLE
         ui_layout.visibility = View.VISIBLE
         iv_trello_logo.visibility = View.VISIBLE
         trello_webview.visibility = View.INVISIBLE
     }
 
     fun hideUI() {
+        loading_image.visibility = View.INVISIBLE
         ui_layout.visibility = View.INVISIBLE
         iv_trello_logo.visibility = View.INVISIBLE
         trello_webview.visibility = View.VISIBLE
     }
 
     fun processSuccessConnected() {
+        showLoadingImage()
         val intent = Intent(this, HomeActivity::class.java)
         intent.flags = intent.flags or Intent.FLAG_ACTIVITY_NO_HISTORY
         startActivity(intent)

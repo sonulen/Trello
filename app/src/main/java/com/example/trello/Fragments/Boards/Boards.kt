@@ -39,6 +39,7 @@ class Boards : Fragment(), onBoardSelectionListener {
     lateinit var client: TrelloClient
     lateinit var repositoryViewModel: TrelloRepositoryViewModel
     private lateinit var boardsAdapter : MyBoardsRecyclerViewAdapter
+    private var firstLoadFlag = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,12 +72,14 @@ class Boards : Fragment(), onBoardSelectionListener {
         repositoryViewModel.getState().observe(this, Observer {
             when(it) {
                 RepostirotyState.LOADING -> {
-
+                    showLoadingImage(view)
                 }
                 RepostirotyState.UPDATED -> {
+                    hideLoadingImage(view)
                     view.swiperefresh.isRefreshing = false
                 }
                 RepostirotyState.FAILED -> {
+                    hideLoadingImage(view)
                     view.swiperefresh.isRefreshing = false
                     Toast.makeText(view.context, "Something went wrong, swipe to refresh", Toast.LENGTH_SHORT).show()
                 }
@@ -103,6 +106,20 @@ class Boards : Fragment(), onBoardSelectionListener {
         }
 
         return view
+    }
+
+    private fun hideLoadingImage(view: View) {
+        firstLoadFlag = false
+        view.home_loading_image.visibility = View.INVISIBLE
+        view.swiperefresh.visibility = View.VISIBLE
+
+    }
+
+    private fun showLoadingImage(view: View) {
+        if (firstLoadFlag) {
+            view.home_loading_image.visibility = View.VISIBLE
+            view.swiperefresh.visibility = View.INVISIBLE
+        }
     }
 
     private fun onFabClick(view: View) {

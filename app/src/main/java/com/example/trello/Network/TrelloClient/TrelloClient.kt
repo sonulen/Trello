@@ -10,7 +10,7 @@ class TrelloClient(private val service: TrelloService):
     ListInteraction,
     CardInteraction {
 
-    var RETRY_COUNT: Long = 1
+    var RETRY_COUNT: Long = 10
 
     /// GET ///
     // Загружаем все команды

@@ -12,7 +12,8 @@ tools:context=".Activity.LoginActivity">
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:visibility="invisible">
 
     <TextView
         android:id="@+id/tw_hello_neo"
@@ -25,23 +26,33 @@ tools:context=".Activity.LoginActivity">
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_sign" />
+
 </LinearLayout>
 
-<ImageView
-    android:id="@+id/iv_trello_logo"
-    android:layout_width="198dp"
-    android:layout_height="48dp"
-    android:layout_gravity="bottom|center_horizontal"
-    android:layout_marginBottom="20dp"
-    android:baselineAlignBottom="false"
-    android:clickable="false"
-    app:srcCompat="@drawable/ic_trello_logo_blue"
-    android:visibility="visible" />
+    <ImageView
+        android:id="@+id/iv_trello_logo"
+        android:layout_width="198dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:baselineAlignBottom="false"
+        android:clickable="false"
+        app:srcCompat="@drawable/ic_trello_logo_blue"
+        android:visibility="invisible" />
 
-<WebView
-    android:id="@+id/trello_webview"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:visibility="invisible"></WebView>
+    <WebView
+        android:id="@+id/trello_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible">
+
+    </WebView>
+
+    <ImageView
+        android:id="@+id/loading_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/ic_loading_image"
+        android:visibility="visible" />
 
 </FrameLayout>

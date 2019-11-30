@@ -415,8 +415,6 @@ class TrelloRepository(private val client: TrelloClient) {
         }
     }
 
-
-
     /**
      * Данные для отображения на RecyclerView
      */

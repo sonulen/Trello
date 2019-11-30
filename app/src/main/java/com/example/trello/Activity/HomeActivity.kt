@@ -1,5 +1,6 @@
 package com.example.trello.Activity
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
@@ -54,7 +55,16 @@ class HomeActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.action_search -> {
+                true
+            }
+            R.id.action_logout -> {
+                val intent = Intent(this, LoginActivity::class.java).apply {
+                    putExtra(EXTRAS_NAME_TO_REMOVE_ACCESS_TOKEN, "true")
+                }
+                startActivity(intent)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
