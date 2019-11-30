@@ -3,4 +3,7 @@
     <color name="colorPrimary">#009ACD</color>
     <color name="colorPrimaryDark">#00688B</color>
     <color name="colorAccent">#0079BF</color>
+    <color name="list_item_background">#AACCCCCC</color>
+    <color name="empty_list">#AA707070</color>
+    <color name="app_color">#0079BF</color>
 </resources>

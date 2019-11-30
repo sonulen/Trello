@@ -1,4 +1,4 @@
-package com.example.trello_parody.Data
+package com.example.trello.Data
 
 data class Card (val id : String, var idList : String, val name : String, var seq : Int)
 
