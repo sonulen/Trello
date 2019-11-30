@@ -20,7 +20,7 @@ class TrelloAuthServiceViewModel
     }
 
     fun getState() : LiveData<AuthState> = trelloAuthService.getState()
-
+    fun getAccessToken() = trelloAuthService.ACCESS_TOKEN
     fun processVerifer(uri: Uri) = trelloAuthService.parseUri(uri)
-
+    fun updateToken(token: String) = trelloAuthService.updateAccessToken(token)
 }

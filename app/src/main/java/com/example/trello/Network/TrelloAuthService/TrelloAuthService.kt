@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.scribe.builder.ServiceBuilder
 import org.scribe.builder.api.TrelloApi
+import org.scribe.model.Token
 import org.scribe.model.Verifier
 import org.scribe.oauth.OAuthService
 
@@ -26,20 +27,16 @@ class TrelloAuthService(
     REST_CONSUMER_SECRET: String,
     REST_CALLBACK_URL: String
 ) {
-    private var state = MutableLiveData<AuthState>(AuthState.NONE)
-
+    private var state = MutableLiveData<AuthState>(AuthState.NONE) ///< Состояние TrelloAuthService
     private lateinit var service : OAuthService ///< Сервис для oAuth1
-    private val CALLBACK_URL: String = REST_CALLBACK_URL
 
-    private lateinit var authorizationUrl : String
+    @Volatile
+    private var serviceInited: Boolean = false ///< Готов ли сервис для запросов
 
-    @Volatile private var serviceInited: Boolean = false
-
-    private var oAuthVerifer: String = "" ///< Verifer полученный от Trello
-
+    private val CALLBACK_URL: String = REST_CALLBACK_URL ///< Куда будут возвращаться запросы
+    private lateinit var authorizationUrl : String ///< Ссылка для отображения пользователю запроса
 
     // Данные которые нужны для последующих запросов
-
     val CONSUMER_KEY: String = REST_CONSUMER_KEY ///< Ключ приложения
     var ACCESS_TOKEN: String = ""   ///< Токен доступа
         get() = field
@@ -96,14 +93,19 @@ class TrelloAuthService(
     }
 
     private fun saveVerifer(oauthVerifier: String) {
-        oAuthVerifer = oauthVerifier
+        var oAuthVerifer = oauthVerifier
 
         GlobalScope.launch {
-            ACCESS_TOKEN = service.getAccessToken(service.requestToken, Verifier(oAuthVerifer)).token
+            val token = service.getAccessToken(service.requestToken, Verifier(oAuthVerifer)).token
             withContext(Dispatchers.Main) {
-                state.value = AuthState.CONNECTED
+                updateAccessToken(token)
             }
         }
+    }
+
+    fun updateAccessToken(token: String) {
+        ACCESS_TOKEN = token
+        state.value = AuthState.CONNECTED
     }
 
 

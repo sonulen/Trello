@@ -1,6 +1,8 @@
 package com.example.trello.Activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -42,9 +44,15 @@ class LoginActivity : AppCompatActivity() {
 
         trelloAuthServiceViewModel.getState().observe(this, Observer {
             when(it) {
-                AuthState.NONE -> showUI()
+                AuthState.NONE -> {
+                    checkSharedPreference()
+                    showUI()
+                }
                 AuthState.CONNECTING -> hideUI()
-                AuthState.CONNECTED -> processSuccessConnected()
+                AuthState.CONNECTED -> {
+                    saveToken(trelloAuthServiceViewModel.getAccessToken())
+                    processSuccessConnected()
+                }
                 AuthState.FAILED -> processFailedConnected()
                 else -> showUI()
             }
@@ -59,6 +67,21 @@ class LoginActivity : AppCompatActivity() {
         if (intent.data is Uri) {
             val uri = intent.data as Uri
             trelloAuthServiceViewModel.processVerifer(uri)
+        }
+    }
+
+    private fun saveToken(accessToken: String) {
+        val preferences: SharedPreferences =
+            this.getSharedPreferences("Trello", Context.MODE_PRIVATE)
+        preferences.edit().putString("ACCESS_TOKEN", accessToken).apply()
+    }
+
+    private fun checkSharedPreference() {
+        val preferences: SharedPreferences =
+            this.getSharedPreferences("Trello", Context.MODE_PRIVATE)
+        val retrivedToken = preferences.getString("ACCESS_TOKEN", null)
+        retrivedToken?.let {
+            trelloAuthServiceViewModel.updateToken(it)
         }
     }
 
