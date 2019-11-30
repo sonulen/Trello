@@ -1,12 +1,18 @@
 package com.example.trello.ViewModels.TrelloRepository
 
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
+import com.example.trello.Data.Board
 import com.example.trello.Network.TrelloClient.TrelloClient
 import com.example.trello.Data.RepostirotyState
 import com.example.trello.Data.TrelloRepository
+import com.example.trello.Fragments.Boards.Boards
 import com.example.trello.TrelloBoards.HomePage.BoardTouchHelperAdapter
+import com.example.trello.ViewModels.TrelloRepositoryBoard.TrelloRepositoryBoardViewModel
+import com.example.trello.ViewModels.TrelloRepositoryBoard.TrelloRepositoryBoardViewModelFactory
 
 
 class TrelloRepositoryViewModel
@@ -65,5 +71,15 @@ class TrelloRepositoryViewModel
 
     fun refresh() {
         repository.requestAllData()
+    }
+
+    fun getBoardViewModel(
+        idBoard: String,
+        fragment: Fragment
+    ) : TrelloRepositoryBoardViewModel? {
+        var selectedBoard: Board? = repository.getBoard(idBoard) ?: return null
+
+        return ViewModelProviders
+            .of(fragment, TrelloRepositoryBoardViewModelFactory(selectedBoard!!, repository))[TrelloRepositoryBoardViewModel::class.java]
     }
 }

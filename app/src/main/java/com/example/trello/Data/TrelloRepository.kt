@@ -23,7 +23,7 @@ enum class RepostirotyState {
 /**
     Класс хранилище всех досок созданных и данных внутри них
  */
-class TrelloRepository(private val client: TrelloClient) {
+class TrelloRepository(private val client: TrelloClient): OrganizationInteraction {
 
     /// Текущее состояние репозитория
     private var state = MutableLiveData<RepostirotyState>(RepostirotyState.NOT_INITED)
@@ -47,7 +47,7 @@ class TrelloRepository(private val client: TrelloClient) {
      */
     init {
         // С генерируем пустой пока список
-        updateList()
+        updatePresentList()
         // Начнём загрузку всех данных
         requestAllData()
     }
@@ -57,7 +57,7 @@ class TrelloRepository(private val client: TrelloClient) {
      * и пробрасывает его на хендлер
      */
     @SuppressLint("CheckResult")
-    fun updateList() {
+    fun updatePresentList() {
         //Сами сгенерим поток с Single списом и подпишемся
         // Когда список перегенерится обновим по хендлеру его на UI
         generateNewList()
@@ -105,7 +105,7 @@ class TrelloRepository(private val client: TrelloClient) {
      * Функция инициализирующая загрузку всех данных с Trello
      */
     @SuppressLint("CheckResult")
-    fun requestAllData() {
+    override fun requestAllData() {
         state.value = RepostirotyState.LOADING
         // Грузим данные от trello. Начнём с организаций
         client.loadOrganization()
@@ -122,7 +122,7 @@ class TrelloRepository(private val client: TrelloClient) {
      * для обновления
      */
     @SuppressLint("CheckResult")
-    fun requestBoards() {
+    override fun requestBoards() {
         state.value = RepostirotyState.LOADING
 
         client.loadBoardList()
@@ -135,11 +135,25 @@ class TrelloRepository(private val client: TrelloClient) {
     }
 
     /**
+     * Функция запроса колонок для доски
+     */
+    @SuppressLint("CheckResult")
+    override fun requestColumns(idBoard: String) {
+        client.loadListOfBoard(idBoard)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { lists -> updateLists(idBoard, lists)},
+                { _ -> state.value = RepostirotyState.FAILED }
+            )
+    }
+
+    /**
      * Функция запроса всех карточек для доски
      * и подписка на их поток для обновления
      */
     @SuppressLint("CheckResult")
-    fun requestCards(idBoard: String) {
+    override fun requestCards(idBoard: String) {
         state.value = RepostirotyState.LOADING
 
         // Загрузим для доски все карточки теперь и распихаем по столбцам
@@ -197,18 +211,12 @@ class TrelloRepository(private val client: TrelloClient) {
         for ((_, org) in organizations) {
             for ((_,board) in org.boards) {
                 // Для каждой доски загрузим список столбцов
-                client.loadListOfBoard(board.id)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        { lists -> updateLists(board.id, lists)},
-                        { _ -> state.value = RepostirotyState.FAILED }
-                    )
+                requestColumns(board.id)
             }
         }
 
         // Для RecyclerView данные уже готовы - обновим список
-        updateList()
+        updatePresentList()
     }
 
     /**
@@ -288,7 +296,7 @@ class TrelloRepository(private val client: TrelloClient) {
     //////////////////// Функции для взаимодействия с Repository из вне ///////////////////////
     // Метод добавления доски.
     @SuppressLint("CheckResult")
-    fun addBoard(name : String, org_name: String) {
+    override fun addBoard(name : String, org_name: String) {
         // Добавление доски в категорию выбранную
         var org_id = organizations.filterValues { it.name == org_name }.keys.first()
 
@@ -303,6 +311,18 @@ class TrelloRepository(private val client: TrelloClient) {
             .subscribeOn(Schedulers.io())
             .subscribe {
                 requestBoards()
+            }
+    }
+
+    @SuppressLint("CheckResult")
+    override fun addcard(idBoard: String, columnId: String, nameCard: String) {
+        // Добавим карточку
+        // И если запрос будет выполнен успешно обновим репозиторий
+        client.postCreateCard(nameCard, columnId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                requestCards(idBoard)
             }
     }
 
@@ -385,9 +405,8 @@ class TrelloRepository(private val client: TrelloClient) {
                         .subscribe {
                             // Удалим организацию из мапы
                             organizations.remove(item.id)
-                            updateList()
+                            updatePresentList()
                         }
-
                 }
             }
             Item.TYPE.BOARD -> {
@@ -408,11 +427,20 @@ class TrelloRepository(private val client: TrelloClient) {
                                 myBoardsRecyclerViewAdapter.onItemDismiss(index)
                             }
                         }
-                        updateList()
+                        updatePresentList()
                     }
             }
             Item.TYPE.FINALY_EMPTY -> {}
         }
+    }
+
+    fun getBoard(idBoard: String): Board? {
+        for ((_, org) in organizations) {
+            if (org.boards.contains(idBoard)) {
+                return org.boards[idBoard]
+            }
+        }
+        return null
     }
 
     /**

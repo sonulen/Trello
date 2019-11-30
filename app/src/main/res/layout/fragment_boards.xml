@@ -41,6 +41,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:srcCompat="@drawable/ic_loading_image"
-        android:visibility="visible" />
+        android:visibility="invisible" />
 
 </FrameLayout>

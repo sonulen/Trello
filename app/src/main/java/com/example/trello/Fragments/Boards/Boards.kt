@@ -1,5 +1,6 @@
 package com.example.trello.Fragments.Boards
 
+import android.content.Context
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.trello.Data.RepostirotyState
+import com.example.trello.Fragments.Board.BoardFragment
 import com.example.trello.Network.TrelloClient.TrelloClient
 import com.example.trello.R
 import com.example.trello.TrelloBoards.HomePage.BoardTouchHelperAdapter
@@ -21,24 +23,27 @@ import com.example.trello.TrelloBoards.HomePage.BoardTouchHelperCallback
 import com.example.trello.TrelloBoards.HomePage.MyBoardsRecyclerViewAdapter
 import com.example.trello.ViewModels.TrelloRepository.TrelloRepositoryViewModel
 import com.example.trello.ViewModels.TrelloRepository.TrelloRepositoryViewModelFactory
+import com.example.trello.ViewModels.TrelloRepositoryBoard.TrelloRepositoryBoardViewModel
 import kotlinx.android.synthetic.main.fragment_boards.view.*
 
+/**
+ * Интерфейс для получения placeholder для Фрагментов
+ */
+interface ProvidesFragmentPlaceholder {
+    fun getPlaceholderID() : Int
+}
 
 interface onBoardSelectionListener {
     fun onBoardSelectionCall(id: String)
 }
 /**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [Boards.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [Boards.newInstance] factory method to
- * create an instance of this fragment.
+ *
  */
 class Boards : Fragment(), onBoardSelectionListener {
     lateinit var client: TrelloClient
     lateinit var repositoryViewModel: TrelloRepositoryViewModel
     private lateinit var boardsAdapter : MyBoardsRecyclerViewAdapter
+    private lateinit var placeholder: ProvidesFragmentPlaceholder
     private var firstLoadFlag = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,6 +111,16 @@ class Boards : Fragment(), onBoardSelectionListener {
         }
 
         return view
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is ProvidesFragmentPlaceholder) {
+            placeholder = context
+        } else {
+            throw RuntimeException(context.toString() + " must implement ProvidesFragmentPlaceholder")
+        }
     }
 
     private fun hideLoadingImage(view: View) {
@@ -210,7 +225,13 @@ class Boards : Fragment(), onBoardSelectionListener {
     }
 
 
-    override fun onBoardSelectionCall(id: String) {
-        // TODO
+    override fun onBoardSelectionCall(idBoard: String) {
+        var boardViewModel: TrelloRepositoryBoardViewModel? =
+            repositoryViewModel.getBoardViewModel(idBoard, this) ?: return
+
+        fragmentManager?.beginTransaction()
+            ?.replace(placeholder.getPlaceholderID(), BoardFragment.newInstance(boardViewModel!!))
+            ?.addToBackStack("Selected Board")
+            ?.commit()
     }
 }

@@ -8,10 +8,11 @@ import android.view.MenuItem
 import com.example.trello.Application.TrelloApplication
 import com.example.trello.DI.ActivityComponent.ActivityComponent
 import com.example.trello.Fragments.Boards.Boards
+import com.example.trello.Fragments.Boards.ProvidesFragmentPlaceholder
 import com.example.trello.R
 import kotlinx.android.synthetic.main.activity_home.*
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : AppCompatActivity(), ProvidesFragmentPlaceholder {
 
     lateinit var activityComponent: ActivityComponent
 
@@ -26,7 +27,7 @@ class HomeActivity : AppCompatActivity() {
         // Если загружаемся первый раз загружем фрагмент со всеми досками
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_placeholder,
+                .replace(getPlaceholderID(),
                     Boards.newInstance(activityComponent.getTrelloClient())
                 )
                 .commit()
@@ -67,5 +68,9 @@ class HomeActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun getPlaceholderID(): Int {
+        return R.id.fragment_placeholder
     }
 }
