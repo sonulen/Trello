@@ -6,17 +6,18 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.util.Pair
+import com.example.trello.Data.Card
 import com.example.trello.R
 import com.woxthebox.draglistview.DragItemAdapter
 import java.util.*
 
 internal class ItemAdapter(
-    list: ArrayList<Pair<Long, String>>,
+    list: ArrayList<Card>,
     private val mLayoutId: Int,
     private val mGrabHandleId: Int,
     private val mDragOnLongPress: Boolean
 ) :
-    DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHolder>() {
+    DragItemAdapter<Card, ItemAdapter.ViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -31,13 +32,13 @@ internal class ItemAdapter(
         position: Int
     ) {
         super.onBindViewHolder(holder, position)
-        val text = mItemList[position]!!.second
+        val text = mItemList[position].name
         holder.mText.text = text
         holder.itemView.tag = mItemList[position]
     }
 
     override fun getUniqueItemId(position: Int): Long {
-        return mItemList[position]!!.first!!
+        return mItemList[position].seq.toLong()
     }
 
     internal inner class ViewHolder(itemView: View) :
