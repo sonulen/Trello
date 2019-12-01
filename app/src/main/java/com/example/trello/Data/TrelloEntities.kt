@@ -1,6 +1,14 @@
 package com.example.trello.Data
 
-data class Card (val id: String, var idList: String, var idBoard: String, val name: String, var seq: Int)
+import com.example.trello.Network.TrelloService.CardFullData
+
+data class Card (val id: String, var idList: String, var idBoard: String, val name: String, var seq: Int) {
+    var data: CardFullData? = null
+
+    fun saveFullData(cardFullData: CardFullData) {
+        data = cardFullData
+    }
+}
 
 data class List (val id: String, var idBoard: String, val name: String, var seq: Int) {
     var cards = hashMapOf<String, Card>()

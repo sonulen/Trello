@@ -5,7 +5,6 @@ import io.reactivex.Completable
 import io.reactivex.Single
 
 class TrelloClient(private val service: TrelloService) {
-
     var RETRY_COUNT: Long = 0
 
     /// GET ///
@@ -30,6 +29,11 @@ class TrelloClient(private val service: TrelloService) {
     // Загружаем все карточки одной доски
      fun loadCardsListOfBoard(idBoard : String): Single<Array<CardData>> {
         return service.getCards(idBoard = idBoard)
+            .retry(RETRY_COUNT)
+    }
+
+    fun loadCardFullData(idCard: String) : Single<CardFullData> {
+        return service.getCardFullData(idCard = idCard)
             .retry(RETRY_COUNT)
     }
 

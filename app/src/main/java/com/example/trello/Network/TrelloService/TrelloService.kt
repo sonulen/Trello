@@ -40,6 +40,18 @@ interface TrelloService {
         @Query("fields") fields: String = "id,idList,name"
     ): Single<Array<CardData>>
 
+    @GET("cards/{idCard}")
+    fun getCardFullData(
+        @Path("idCard") idCard: String,
+        @Query("fields") fields: String = "id,dateLastActivity,desc,name,shortUrl,actions,board",
+        @Query("attachments") attachments: String = "false",
+        @Query("members") members: Boolean = true,
+        @Query("member_fields") member_fields: String = "all",
+        @Query("board") board: Boolean = true,
+        @Query("board_fields") board_fields: String = "name,idOrganization",
+        @Query("actions") actions: String = "all"
+     ): Single<CardFullData>
+
     @POST("boards/")
     fun createBoard(
         @Query("name") name: String,

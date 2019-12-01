@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.trello.Network.TrelloClient.TrelloClient
-import com.example.trello.Network.TrelloService.BoardData
-import com.example.trello.Network.TrelloService.CardData
-import com.example.trello.Network.TrelloService.ListData
-import com.example.trello.Network.TrelloService.OrganizationData
+import com.example.trello.Network.TrelloService.*
 import com.example.trello.TrelloBoards.HomePage.BoardTouchHelperAdapter
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -165,6 +162,21 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
             )
     }
 
+    @SuppressLint("CheckResult")
+    private fun requestCardFullData(idOrganization: String, idBoard: String, card: Card) {
+        client.loadCardFullData(card.id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { cardFullData -> updateCardFullData(idOrganization, idBoard, card, cardFullData) },
+                { _ -> state.value = RepostirotyState.FAILED }
+            )
+    }
+
+    private fun updateCardFullData(idOrganization: String, idBoard: String, card: Card, cardFullData: CardFullData) {
+        organizations[idOrganization]!!.boards[idBoard]!!.lists[card.idList]!!.cards[card.id]!!.saveFullData(cardFullData)
+    }
+
     /////////////////////// Функции для обработки полученных данных ///////////////////////////////
     /**
      * Функция обработки ответа от апи с списком организаций
@@ -288,12 +300,7 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                     // Заносим карточку в доску
                     uBoard.lists[new_card.idList]!!.add_card(new_card)
 
-                    // Т.к. у трелло какие то фокусы с порядковыми номерами обновим их у карточек
-                    client.updateCard(new_card.id, pos = new_card.seq.toString())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe ({}, {_ -> state.value = RepostirotyState.FAILED })
-
+                    requestCardFullData(uBoard.idOrganization, uBoard.id, new_card)
                 }
             }
         }
@@ -354,8 +361,8 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
             it.cards.remove(card.id)
             var sortedColumnsBySeq = it.cards.values.sortedBy { it.seq }
 
-            for ((sequence, card) in sortedColumnsBySeq.withIndex()) {
-                card.seq = sequence
+            for ((sequence, updatingCard) in sortedColumnsBySeq.withIndex()) {
+                updatingCard.seq = sequence
             }
         }
     }
