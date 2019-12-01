@@ -46,8 +46,7 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
      * 2. Инциализирует загрузку всех данных
      */
     init {
-        // С генерируем пустой пока список
-        updatePresentList()
+        dataForPresent.add(Item(Item.TYPE.FINALY_EMPTY, "nope","Can't update date. Swipe to refresh"))
         // Начнём загрузку всех данных
         requestAllData()
     }
@@ -203,7 +202,7 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
             // Если такой доски еще нет до добавим
             if (!org.boards.containsKey(board.id)) {
                 var new_board = Board(board.id ?: "0", org.id,
-                    board.name ?: "oops", org.boards.count() + 1)
+                    board.name ?: "oops", org.boards.count())
                 org.add_board(new_board)
             }
         }
@@ -243,7 +242,7 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                         list.id ?: "oops",
                         it.id,
                         list.name ?: "oops",
-                        uBoard.lists.count() + 1
+                        uBoard.lists.count()
                     )
                     uBoard.add_list(new_list)
                 }
@@ -278,8 +277,8 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                 if (uBoard.lists.containsKey(card.idList) &&
                     !uBoard.lists[card.idList]!!.cards.containsKey(card.id)) {
                     // Temp новая карточка
-                    var new_card = Card(card.id ?: "oops", card.idList ?: "oops",
-                        card.name ?: "oops", uBoard.lists[card.idList]!!.cards.count() + 1)
+                    var new_card = Card(card.id ?: "oops", card.idList ?: "oops", it.id,
+                        card.name ?: "oops", uBoard.lists[card.idList]!!.cards.count())
                     // Заносим карточку в доску
                     uBoard.lists[new_card.idList]!!.add_card(new_card)
                 }
@@ -441,6 +440,139 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
             }
         }
         return null
+    }
+
+    @SuppressLint("CheckResult")
+    override fun moveCard(card: Card, toColumn: Int, toRow: Int) {
+        var newIdList: String = findIdListInBoardBySeq(card.idBoard, toColumn)
+
+        // Минус 1 потому что count() от 1 а индексация от 0
+        var newListSize = findListSizeBySeq(card.idBoard, toColumn) - 1
+
+        var pos: String
+        if (toRow == 0) {
+            pos = "top"
+        } else if (toRow >= newListSize) {
+            // Больше потому что если мы добавляем в новый список то там кол-во меньше пока что
+            pos = "bottom"
+        } else {
+            pos = toRow.toString()
+        }
+
+        client.updateCard(card.id, idList = newIdList, pos = pos)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe (
+                {
+                    // Наверное стоило лучше локально все сделать, но пока сложно это.
+                    cleanBoardColumnsData(card.idBoard)
+                    requestColumns(card.idBoard)
+                },
+                {_ -> state.value = RepostirotyState.FAILED })
+    }
+
+
+    @SuppressLint("CheckResult")
+    override fun moveColum(idBoard: String, oldPosition: Int, newPosition: Int) {
+        if (oldPosition == newPosition) return
+
+        var idList: String = findIdListInBoardBySeq(idBoard, oldPosition)
+
+        // Минус 1 потому что count() от 1 а индексация от 0
+        var boardCountOfLists = findBoardSizeBySeq(idBoard) - 1
+
+        var pos: String
+        if (newPosition == 0) {
+            pos = "top"
+        } else if (newPosition >= boardCountOfLists) {
+            // Больше потому что если мы добавляем в новый список то там кол-во меньше пока что
+            pos = "bottom"
+        } else {
+            pos = newPosition.toString()
+        }
+
+        client.updateList(idList, pos = pos)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe (
+                {
+                    // Наверное стоило лучше локально все сделать, но пока сложно это.
+                    localColumnMove(idBoard, idList, oldPosition, newPosition)
+                },
+                {_ -> state.value = RepostirotyState.FAILED })
+
+
+    }
+
+    private fun localColumnMove(idBoard: String, idList: String, oldPosition: Int, newPosition: Int) {
+        for ((_, org) in organizations) {
+            for ((_, board) in org.boards) {
+                if (board.id == idBoard) {
+                    var sortedColumnsBySeq = board.lists.values.sortedBy { it.seq }
+                    for (list in sortedColumnsBySeq) {
+                        if (list.id == idList) {
+                            list.seq = newPosition
+                        } else if (list.seq >= newPosition){
+                            list.seq += 1
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun findBoardSizeBySeq(idBoard: String): Int {
+        for ((_, org) in organizations) {
+            for ((_, board) in org.boards) {
+                if (board.id == idBoard) {
+                    return board.lists.count()
+                }
+            }
+        }
+        return 0
+    }
+
+    private fun findListSizeBySeq(idBoard: String, toColumn: Int): Int {
+        for ((_, org) in organizations) {
+            for((_,board) in org.boards) {
+                if (board.id == idBoard) {
+                    for ((_, list) in board.lists) {
+                        if (list.seq == toColumn) {
+                            return list.cards.count()
+                        }
+                    }
+                }
+            }
+        }
+        return 0
+    }
+
+    private fun cleanBoardColumnsData(idBoard: String) {
+        for ((_, org) in organizations) {
+            for((_,board) in org.boards) {
+                if (board.id == idBoard) {
+                    board.lists.clear()
+                }
+            }
+        }
+    }
+
+
+    private fun findIdListInBoardBySeq(idBoard: String, column: Int): String {
+        var findedIdList: String = ""
+        for ((_, org) in organizations) {
+            for((_,board) in org.boards) {
+                if (board.id == idBoard) {
+                    for ((_, list) in board.lists) {
+                        if (list.seq == column) {
+                            findedIdList = list.id
+                            return findedIdList
+                        }
+                    }
+                }
+            }
+        }
+        return findedIdList
     }
 
     /**

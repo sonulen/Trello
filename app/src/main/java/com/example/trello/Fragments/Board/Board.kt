@@ -12,12 +12,10 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.util.Pair
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.trello.Data.Card
 import com.example.trello.Data.List
-import com.example.trello.Data.TrelloRepository
 import com.example.trello.Fragments.Boards.ProvidesFragmentPlaceholder
 
 import com.example.trello.R
@@ -26,7 +24,6 @@ import com.example.trello.ViewModels.TrelloRepositoryBoard.TrelloRepositoryBoard
 import com.woxthebox.draglistview.BoardView
 import com.woxthebox.draglistview.DragItem
 import kotlinx.android.synthetic.main.column_drag_layout.view.*
-import kotlinx.android.synthetic.main.column_header.*
 import kotlinx.android.synthetic.main.column_header.view.*
 import kotlinx.android.synthetic.main.column_item.view.*
 import kotlinx.android.synthetic.main.fragment_board.view.*
@@ -38,6 +35,9 @@ class BoardFragment : Fragment() {
     private lateinit var placeholder: ProvidesFragmentPlaceholder
     private var sCreatedItems = 0
     private var mColumns: Int = 0
+
+    private var columnDragFirstTime = true
+    private var oldColumnPosition: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,10 +93,7 @@ class BoardFragment : Fragment() {
             override fun onItemDragEnded(fromColumn: Int, fromRow: Int, toColumn: Int, toRow: Int) {
                 if (fromColumn != toColumn || fromRow != toRow) {
                     var card = mBoardView.getAdapter(toColumn).itemList[toRow] as Card
-                    Toast.makeText(context, "Item ${card.seq} and ${card.name}", Toast.LENGTH_SHORT).show()
-                    // Здесь перемещать карточку
-                    // boardViewModel.updateCard(card, fromColumn, fromRow, toColumn, toRow)
-                    Toast.makeText(context, "onItemDragEnded: End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show()
+                    boardViewModel.moveCard(card, toColumn, toRow)
                 }
             }
 
@@ -106,7 +103,6 @@ class BoardFragment : Fragment() {
                 newColumn: Int,
                 newRow: Int
             ) {
-                Toast.makeText(mBoardView.context, "onItemChangedPosition: Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show()
             }
 
             override fun onItemChangedColumn(oldColumn: Int, newColumn: Int) {
@@ -114,23 +110,24 @@ class BoardFragment : Fragment() {
                 itemCount1.text = mBoardView.getAdapter(oldColumn).itemCount.toString()
                 val itemCount2 = mBoardView.getHeaderView(newColumn).item_count
                 itemCount2.text = mBoardView.getAdapter(newColumn).itemCount.toString()
-                Toast.makeText(mBoardView.context, "onItemChangedColumn", Toast.LENGTH_SHORT).show()
             }
 
             override fun onFocusedColumnChanged(oldColumn: Int, newColumn: Int) {
-                Toast.makeText(context, "Focused column changed from " + oldColumn + " to " + newColumn, Toast.LENGTH_SHORT).show()
             }
 
             override fun onColumnDragStarted(position: Int) {
-                Toast.makeText(context, "Column drag started from " + position, Toast.LENGTH_SHORT).show()
             }
 
             override fun onColumnDragChangedPosition(oldPosition: Int, newPosition: Int) {
-                Toast.makeText(context, "Column changed from " + oldPosition + " to " + newPosition, Toast.LENGTH_SHORT).show()
+                if (columnDragFirstTime) {
+                    oldColumnPosition = oldPosition
+                    columnDragFirstTime = false
+                }
             }
 
             override fun onColumnDragEnded(position: Int) {
-                Toast.makeText(context, "Column drag ended at " + position, Toast.LENGTH_SHORT).show()
+                columnDragFirstTime = true
+                boardViewModel.changeColumPos(oldColumnPosition, position)
             }
         })
         mBoardView.setBoardCallback(object : BoardView.BoardCallback {
@@ -168,8 +165,8 @@ class BoardFragment : Fragment() {
         )
 
         // Загрузим колонки из доски
-
-        for ((_,list) in boardViewModel.getBoardColumns()) {
+        var sortedListBySeq = boardViewModel.getBoardColumns().values.sortedBy { it.seq }
+        for (list in sortedListBySeq) {
             addColumn(v, list)
         }
 
@@ -184,7 +181,9 @@ class BoardFragment : Fragment() {
         var mBoardView = v.board_view
         val mItemArray = ArrayList<Card>()
 
-        for (i in  list.cards.values) {
+        var sortedCardsBySeq = list.cards.values.sortedBy { it.seq }
+
+        for (i in  sortedCardsBySeq) {
             val id = sCreatedItems++.toLong()
             mItemArray.add(i)
         }
@@ -194,7 +193,8 @@ class BoardFragment : Fragment() {
             mItemArray,
             R.layout.column_item,
             R.id.item_layout,
-            true
+            true,
+            list.id
         )
         val header = View.inflate(activity, R.layout.column_header, null)
 
@@ -203,11 +203,12 @@ class BoardFragment : Fragment() {
 
         header.add_item_image.setOnClickListener { view ->
             val id = sCreatedItems++.toLong()
-            val item = Pair<Long, String>(id, "New card with № $id")
+            val seq = mItemArray.count()
+            val item = Card(id.toString(), list.id, list.idBoard, "New card with № $id", seq)
             // А как лямбды захватывают переменные? В ++ я бы так не смог без доп указаний
-            mBoardView.addItem(column, 0, item, true)
+            mBoardView.addItem(column, seq, item, true)
             (header.findViewById(R.id.item_count) as TextView).text = "Count of cards:" + mItemArray.size.toString()
-            boardViewModel.addCard(list.id, item.second!!)
+            boardViewModel.addCard(list.id, item.name)
         }
 
         mBoardView.addColumn(

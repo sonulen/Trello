@@ -1,8 +1,8 @@
 package com.example.trello.Data
 
-data class Card (val id : String, var idList : String, val name : String, var seq : Int)
+data class Card (val id: String, var idList: String, var idBoard: String, val name: String, var seq: Int)
 
-data class List (val id : String, var idBoard : String, val name : String, var seq : Int) {
+data class List (val id: String, var idBoard: String, val name: String, var seq: Int) {
     var cards = hashMapOf<String, Card>()
 
     fun add_card (card: Card) {

@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.util.Pair
 import com.example.trello.Data.Card
 import com.example.trello.R
 import com.woxthebox.draglistview.DragItemAdapter
@@ -15,7 +14,8 @@ internal class ItemAdapter(
     list: ArrayList<Card>,
     private val mLayoutId: Int,
     private val mGrabHandleId: Int,
-    private val mDragOnLongPress: Boolean
+    private val mDragOnLongPress: Boolean,
+    val idList: String
 ) :
     DragItemAdapter<Card, ItemAdapter.ViewHolder>() {
     override fun onCreateViewHolder(

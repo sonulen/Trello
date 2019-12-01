@@ -61,22 +61,36 @@ interface TrelloService {
     fun createList(
         @Query("name") name: String,
         @Query("idBoard") idBoard: String,
-        @Query("pos") pos: String = "top"
+        @Query("pos") pos: String = "bottom"
     ): Completable
 
     @POST("cards")
     fun createCard(
         @Query("name") name: String,
         @Query("idList") idList: String,
-        @Query("pos") pos: String = "top"
+        @Query("pos") pos: String = "bottom"
     ): Completable
 
     @PUT("cards/{idCard}")
     fun updateCard(
         @Path("idCard") idCard: String,
-        @Query("idList") idList: String,
-        @Query("pos") pos: String = "top"
+        @Query("name") name: String? = null,
+        @Query("desc") desc: String? = null,
+        @Query("closed") closed: String? = null,
+        @Query("idList") idList: String? = null,
+        @Query("idBoard") idBoard: String? = null,
+        @Query("pos") pos: String? = null
     ): Completable
+
+    @PUT("lists/{idList}")
+    fun updateList(
+        @Path("idList") idList: String,
+        @Query("name") name: String? = null,
+        @Query("closed") closed: String? = null,
+        @Query("idBoard") idBoard: String? = null,
+        @Query("pos") pos: String? = null
+    ): Completable
+
 
     @PUT("lists/{idList}/closed")
     fun archiveList(

@@ -42,22 +42,43 @@ class TrelloClient(private val service: TrelloService) {
     }
 
     // Создаем список в доске
-     fun postCreateList (name: String, idBoard: String, pos: String = "top"): Completable {
+     fun postCreateList (name: String, idBoard: String, pos: String = "bottom"): Completable {
         return service.createList(name = name, idBoard = idBoard)
             .retry(RETRY_COUNT)
     }
 
     // Создаем карточку в списке
-     fun postCreateCard (name: String, idList: String, pos: String = "top"): Completable {
-        return service.createCard(name = name, idList = idList)
+     fun postCreateCard (name: String, idList: String, pos: String = "bottom"): Completable {
+        return service.createCard(name = name, idList = idList, pos = pos)
             .retry(RETRY_COUNT)
     }
 
     /// PUT ///
     // Обновим родительский список у карточки
-     fun updateCard(idCard : String, newIdList : String, pos : String = "top"): Completable {
-        return service.updateCard(idCard = idCard, idList = newIdList)
-            .retry(RETRY_COUNT)
+     fun updateCard(idCard : String,
+                    name: String? = null,
+                    desc: String? = null,
+                    closed: String? = null,
+                    idList: String? = null,
+                    idBoard: String? = null,
+                    pos: String? = null): Completable {
+        return service.updateCard(idCard = idCard,
+            name = name,
+            desc = desc,
+            closed = closed,
+            idList = idList,
+            idBoard = idBoard,
+            pos = pos).retry(RETRY_COUNT)
+    }
+
+    fun updateList(
+        idList: String,
+        name: String? = null,
+        closed: String? = null,
+        idBoard: String? = null,
+        pos: String? = null
+    ): Completable {
+        return service.updateList(idList, name, closed, idBoard, pos).retry(RETRY_COUNT)
     }
 
     // Заархивируем список
