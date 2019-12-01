@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.trello.Data.Card
 import com.example.trello.Data.List
 import com.example.trello.Fragments.Boards.ProvidesFragmentPlaceholder
+import com.example.trello.Fragments.Card.CardRemoveInterface
 
 import com.example.trello.R
 import com.example.trello.View.BoardViewComponents.ItemAdapter
@@ -31,9 +32,10 @@ import kotlinx.android.synthetic.main.fragment_board.view.*
 import java.util.ArrayList
 
 
-class BoardFragment : Fragment(), onCardClickListener {
+class BoardFragment : Fragment(), onCardClickListener, CardRemoveInterface {
     private lateinit var boardViewModel: TrelloRepositoryBoardViewModel
     private lateinit var placeholder: ProvidesFragmentPlaceholder
+    private lateinit var mBoardView: BoardView
     private var sCreatedItems = 0
     private var mColumns: Int = 0
 
@@ -142,7 +144,29 @@ class BoardFragment : Fragment(), onCardClickListener {
     }
 
     private fun resetBoard(v : View) {
-        var mBoardView = v.board_view
+        mBoardView = v.board_view
+        mBoardView.setCustomDragItem(
+            MyDragItem(
+                activity!!,
+                R.layout.column_item
+            )
+        )
+        mBoardView.setCustomColumnDragItem(
+            MyColumnDragItem(
+                activity!!,
+                R.layout.column_drag_layout
+            )
+        )
+
+        // Загрузим колонки из доски
+        var sortedListBySeq = boardViewModel.getBoardColumns().values.sortedBy { it.seq }
+        for (list in sortedListBySeq) {
+            addColumn(list)
+        }
+
+    }
+
+    private fun cleanBoard() {
         mBoardView.clearBoard()
         mBoardView.setCustomDragItem(
             MyDragItem(
@@ -160,9 +184,8 @@ class BoardFragment : Fragment(), onCardClickListener {
         // Загрузим колонки из доски
         var sortedListBySeq = boardViewModel.getBoardColumns().values.sortedBy { it.seq }
         for (list in sortedListBySeq) {
-            addColumn(v, list)
+            addColumn(list)
         }
-
     }
 
     /**
@@ -170,8 +193,7 @@ class BoardFragment : Fragment(), onCardClickListener {
      * @param v
      * @param list Список из которого генерим
      */
-    private fun addColumn(v : View, list : List) {
-        var mBoardView = v.board_view
+    private fun addColumn( list : List) {
         val mItemArray = ArrayList<Card>()
 
         var sortedCardsBySeq = list.cards.values.sortedBy { it.seq }
@@ -281,6 +303,7 @@ class BoardFragment : Fragment(), onCardClickListener {
 
     override fun processDelete(card: Card) {
         boardViewModel.removeCard(card)
+        cleanBoard()
     }
 
     /**
@@ -403,8 +426,10 @@ class BoardFragment : Fragment(), onCardClickListener {
 
     override fun processClick(card: Card) {
         fragmentManager?.beginTransaction()
-            ?.replace(placeholder.getPlaceholderID(), com.example.trello.Fragments.Card.CardFragment.newInstance(card))
+            ?.replace(placeholder.getPlaceholderID(), com.example.trello.Fragments.Card.CardFragment.newInstance(card, this as CardRemoveInterface))
             ?.addToBackStack("Selected card")
             ?.commit()
     }
+
+    override fun remove(card: Card) = processDelete(card)
 }

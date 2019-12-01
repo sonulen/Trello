@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.trello.Application.TrelloApplication
 import com.example.trello.DI.ActivityComponent.ActivityComponent
@@ -64,6 +65,7 @@ class HomeActivity : AppCompatActivity(), ProvidesFragmentPlaceholder {
                 true
             }
             R.id.action_search -> {
+                Toast.makeText(this, "Не сделал, но описал в edu как реализовал бы", Toast.LENGTH_SHORT).show()
                 true
             }
             R.id.action_logout -> {

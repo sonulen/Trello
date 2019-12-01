@@ -6,8 +6,8 @@
         android:id="@+id/action_search"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@drawable/ic_search_foreground"
-        android:visible="false" />
+        android:title="@string/search"
+        android:icon="@drawable/ic_search_foreground" />
 
     <item
         android:id="@+id/action_logout"

@@ -12,53 +12,88 @@
     android:paddingTop="2dp"
     tools:context=".Fragments.Card.CardFragment">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/nameCard"
+
+
+    <TextView
+        android:id="@+id/cardHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:duplicateParentState="true"
-        android:foreground="@drawable/card_view_selector"
-        card_view:cardBackgroundColor="#ffffff"
-        card_view:cardCornerRadius="4dp"
-        card_view:cardElevation="2dp"
-        card_view:cardPreventCornerOverlap="true"
-        card_view:cardUseCompatPadding="true">
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:text="@string/card_name" />
 
-        <EditText
-            android:id="@+id/cardName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Card Name"
-            android:textSize="14sp"
-            android:padding="8dp" />
-    </androidx.cardview.widget.CardView>
+    <TextView
+        android:id="@+id/cardName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+    <TextView
+        android:layout_marginTop="2dp"
+        android:id="@+id/boardHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:text="@string/source_board" />
+
+    <TextView
+        android:id="@+id/fromBoard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <View
+        android:id="@+id/divider0"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+    <TextView
+        android:id="@+id/headerDesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:text="@string/descriptionHeader" />
+
+    <TextView
+        android:id="@+id/desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/description" />
 
     <View
         android:id="@+id/divider2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
+        android:background="?android:attr/listDivider"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/descCard"
+    <TextView
+        android:id="@+id/headerUrl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp">
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:text="Short url" />
 
-        <TextView
-            android:id="@+id/descHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Description" />
-
-        <TextView
-                android:id="@+id/desc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bla bla bla" />
-
-    </androidx.cardview.widget.CardView>
+    <TextView
+        android:id="@+id/url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
 
     <View
         android:id="@+id/divider3"
@@ -66,24 +101,19 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/membersCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp">
 
-        <TextView
-            android:id="@+id/membersHeader"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <Button style="@style/Widget.AppCompat.Button.Colored"
+            android:theme="@style/PrimaryButton"
+            android:gravity="center"
+            android:id="@+id/removeCardBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Members list" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-
-    </androidx.cardview.widget.CardView>
+            android:text="@string/delete_card" />
+    </LinearLayout>
 
     <View
         android:id="@+id/divider4"
@@ -91,22 +121,18 @@
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/actionCard"
+    <TextView
+        android:id="@+id/headerActions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp">
+        android:textColor="@color/colorPrimary"
+        android:textSize="20sp"
+        android:text="@string/actions" />
 
-        <TextView
-            android:id="@+id/actionHeader"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Actions" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/actionRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
-    </androidx.cardview.widget.CardView>
 </LinearLayout>

@@ -59,10 +59,13 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
         generateNewList()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { list ->
-                dataForPresent = list
-                state.value = RepostirotyState.UPDATED
-            }
+            .subscribe (
+                { list ->
+                    dataForPresent = list
+                    state.value = RepostirotyState.UPDATED
+                },
+                { _ -> state.value = RepostirotyState.FAILED }
+            )
     }
 
     /**
@@ -256,13 +259,7 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                         list.name ?: "oops",
                         uBoard.lists.count()
                     )
-
                     uBoard.add_list(new_list)
-                    // Т.к. у трелло какие то фокусы с порядковыми номерами обновим их у колонок
-                    client.updateList(new_list.id, pos = new_list.seq.toString())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe ({}, {_ -> state.value = RepostirotyState.FAILED })
                 }
             }
 
@@ -329,9 +326,10 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
         client.postCreateBoard(name, org_id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                requestBoards()
-            }
+            .subscribe (
+                { requestBoards() },
+                { _ -> state.value = RepostirotyState.FAILED }
+            )
     }
 
     @SuppressLint("CheckResult")
@@ -346,13 +344,15 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
             }
     }
 
+    @SuppressLint("CheckResult")
     override fun removeCard(board: Board, card: Card) {
         client.deleteCard(card.id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe {
-                localRemoveCard(board, card)
-            }
+            .subscribe (
+                { localRemoveCard(board, card) },
+                { _ -> state.value = RepostirotyState.FAILED }
+            )
     }
 
     private fun localRemoveCard(board: Board, card: Card) {
@@ -443,11 +443,14 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                     client.deleteOrganization(item.id)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            // Удалим организацию из мапы
-                            organizations.remove(item.id)
-                            updatePresentList()
-                        }
+                        .subscribe (
+                            {
+                                // Удалим организацию из мапы
+                                organizations.remove(item.id)
+                                updatePresentList()
+                            },
+                            { _ -> state.value = RepostirotyState.FAILED }
+                        )
                 }
             }
             Item.TYPE.BOARD -> {
@@ -456,20 +459,23 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                 client.deleteBoard(bItem.id)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        // Удалим доску из мапы
-                        organizations[bItem.idOrganization]?.boards?.remove(bItem.id)
+                    .subscribe (
+                        {
+                            // Удалим доску из мапы
+                            organizations[bItem.idOrganization]?.boards?.remove(bItem.id)
 
-                        if (organizations[bItem.idOrganization]?.boards?.count() == 0) {
-                            // т.к. мы удаляем еще и Организацию, удалим ее из Адаптера и рекурсивно и у нас
-                            var index = itemList.indexOf(itemList.find { it.type == Item.TYPE.ORGANIZATION
-                                    && it.id == bItem.idOrganization })
-                            if (index != -1) {
-                                myBoardsRecyclerViewAdapter.onItemDismiss(index)
+                            if (organizations[bItem.idOrganization]?.boards?.count() == 0) {
+                                // т.к. мы удаляем еще и Организацию, удалим ее из Адаптера и рекурсивно и у нас
+                                var index = itemList.indexOf(itemList.find { it.type == Item.TYPE.ORGANIZATION
+                                        && it.id == bItem.idOrganization })
+                                if (index != -1) {
+                                    myBoardsRecyclerViewAdapter.onItemDismiss(index)
+                                }
                             }
-                        }
-                        updatePresentList()
-                    }
+                            updatePresentList()
+                        },
+                        { _ -> state.value = RepostirotyState.FAILED }
+                    )
             }
             Item.TYPE.FINALY_EMPTY -> {}
         }

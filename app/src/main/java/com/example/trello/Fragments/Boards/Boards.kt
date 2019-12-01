@@ -14,9 +14,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.trello.Data.BoardInteraction
+import com.example.trello.Data.Card
 import com.example.trello.Data.RepostirotyState
 import com.example.trello.Fragments.Board.BoardFragment
+import com.example.trello.Fragments.Card.CardRemoveInterface
 import com.example.trello.Network.TrelloClient.TrelloClient
 import com.example.trello.R
 import com.example.trello.TrelloBoards.HomePage.BoardTouchHelperAdapter
@@ -24,7 +25,6 @@ import com.example.trello.TrelloBoards.HomePage.BoardTouchHelperCallback
 import com.example.trello.TrelloBoards.HomePage.MyBoardsRecyclerViewAdapter
 import com.example.trello.ViewModels.TrelloRepository.TrelloRepositoryViewModel
 import com.example.trello.ViewModels.TrelloRepository.TrelloRepositoryViewModelFactory
-import com.example.trello.ViewModels.TrelloRepositoryBoard.TrelloRepositoryBoardViewModel
 import kotlinx.android.synthetic.main.fragment_boards.view.*
 
 /**
