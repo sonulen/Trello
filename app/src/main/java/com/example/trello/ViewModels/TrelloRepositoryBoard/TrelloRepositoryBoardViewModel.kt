@@ -1,6 +1,5 @@
 package com.example.trello.ViewModels.TrelloRepositoryBoard
 
-import androidx.lifecycle.ViewModel
 import com.example.trello.Data.Board
 import com.example.trello.Data.BoardInteraction
 import com.example.trello.Data.Card

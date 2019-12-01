@@ -16,6 +16,7 @@ import com.example.trello.Fragments.Boards.onBoardSelectionListener
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.empty_boards_list.view.*
 import kotlinx.android.synthetic.main.header_boards_list.view.*
 import kotlinx.android.synthetic.main.item_boards_list.view.*
 import java.util.*
@@ -153,7 +154,7 @@ class MyBoardsRecyclerViewAdapter(
     }
 
     class BoardViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
-        val mNameView: TextView = mView.content
+        val mNameView: TextView = mView.text
 
         override fun toString(): String {
             return super.toString() + " '" + mNameView.text + "'"

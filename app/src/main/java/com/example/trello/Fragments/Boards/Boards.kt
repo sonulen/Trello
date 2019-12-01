@@ -127,14 +127,14 @@ class Boards : Fragment(), onBoardSelectionListener {
     private fun hideLoadingImage(view: View) {
         firstLoadFlag = false
         view.home_loading_image.visibility = View.INVISIBLE
-        view.swiperefresh.visibility = View.VISIBLE
+        view.boards_content.visibility = View.VISIBLE
 
     }
 
     private fun showLoadingImage(view: View) {
         if (firstLoadFlag) {
             view.home_loading_image.visibility = View.VISIBLE
-            view.swiperefresh.visibility = View.INVISIBLE
+            view.boards_content.visibility = View.INVISIBLE
         }
     }
 

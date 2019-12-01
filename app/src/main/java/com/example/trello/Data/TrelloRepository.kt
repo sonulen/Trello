@@ -321,6 +321,7 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
         // Добавим доску на сервере
         client.postCreateBoard(name, org_id)
             .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 requestBoards()
             }
