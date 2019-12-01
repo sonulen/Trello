@@ -1,5 +1,3 @@
 package com.example.trello.Data
 
-interface ListInteraction: CardInteraction {
-
-}
+interface ListInteraction: CardInteraction

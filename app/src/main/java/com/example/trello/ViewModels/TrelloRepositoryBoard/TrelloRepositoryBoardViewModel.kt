@@ -16,4 +16,8 @@ constructor(private val board: Board, private val client: BoardInteraction) {
     fun changeColumPos(oldPosition: Int, newPosition: Int) {
         client.moveColum(board.id, oldPosition, newPosition)
     }
+
+    fun removeCard(card: Card) {
+        client.removeCard(board, card)
+    }
 }

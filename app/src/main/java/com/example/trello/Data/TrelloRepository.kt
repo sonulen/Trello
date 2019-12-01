@@ -339,6 +339,27 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
             }
     }
 
+    override fun removeCard(board: Board, card: Card) {
+        client.deleteCard(card.id)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                localRemoveCard(board, card)
+            }
+    }
+
+    private fun localRemoveCard(board: Board, card: Card) {
+        var list = organizations[board.idOrganization]!!.boards[board.id]!!.lists[card.idList]
+        list?.let {
+            it.cards.remove(card.id)
+            var sortedColumnsBySeq = it.cards.values.sortedBy { it.seq }
+
+            for ((sequence, card) in sortedColumnsBySeq.withIndex()) {
+                card.seq = sequence
+            }
+        }
+    }
+
     fun boardMove(
         from: BoardItem,
         to: BoardItem,

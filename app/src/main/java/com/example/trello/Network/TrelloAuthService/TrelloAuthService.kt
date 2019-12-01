@@ -39,10 +39,7 @@ class TrelloAuthService(
     // Данные которые нужны для последующих запросов
     val CONSUMER_KEY: String = REST_CONSUMER_KEY ///< Ключ приложения
     var ACCESS_TOKEN: String = ""   ///< Токен доступа
-        get() = field
-        private set(value) {
-            field = value
-        }
+        private set
 
     init {
         GlobalScope.launch {

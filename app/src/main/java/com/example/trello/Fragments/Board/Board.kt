@@ -20,6 +20,7 @@ import com.example.trello.Fragments.Boards.ProvidesFragmentPlaceholder
 
 import com.example.trello.R
 import com.example.trello.View.BoardViewComponents.ItemAdapter
+import com.example.trello.View.BoardViewComponents.onCardClickListener
 import com.example.trello.ViewModels.TrelloRepositoryBoard.TrelloRepositoryBoardViewModel
 import com.woxthebox.draglistview.BoardView
 import com.woxthebox.draglistview.DragItem
@@ -30,7 +31,7 @@ import kotlinx.android.synthetic.main.fragment_board.view.*
 import java.util.ArrayList
 
 
-class BoardFragment : Fragment() {
+class BoardFragment : Fragment(), onCardClickListener {
     private lateinit var boardViewModel: TrelloRepositoryBoardViewModel
     private lateinit var placeholder: ProvidesFragmentPlaceholder
     private var sCreatedItems = 0
@@ -38,10 +39,6 @@ class BoardFragment : Fragment() {
 
     private var columnDragFirstTime = true
     private var oldColumnPosition: Int = 0
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,10 +68,6 @@ class BoardFragment : Fragment() {
         } else {
             throw RuntimeException(context.toString() + " must implement ProvidesFragmentPlaceholder")
         }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
     }
 
     ////////////////////////// Функции работы с Board Recycler View ///////////////////////////
@@ -193,7 +186,7 @@ class BoardFragment : Fragment() {
             R.layout.column_item,
             R.id.item_layout,
             true,
-            list.id
+            this as onCardClickListener
         )
         val header = View.inflate(activity, R.layout.column_header, null)
 
@@ -284,6 +277,10 @@ class BoardFragment : Fragment() {
         mBoardView.addItem(column, seq, item, true)
         (header.findViewById(R.id.item_count) as TextView).text = "Count of cards:" + mItemArray.size.toString()
         boardViewModel.addCard(list.id, item.name)
+    }
+
+    override fun processDelete(card: Card) {
+        boardViewModel.removeCard(card)
     }
 
     /**
@@ -402,5 +399,12 @@ class BoardFragment : Fragment() {
             BoardFragment().apply {
                 boardViewModel = newBoardViewModel
             }
+    }
+
+    override fun processClick(card: Card) {
+        fragmentManager?.beginTransaction()
+            ?.replace(placeholder.getPlaceholderID(), com.example.trello.Fragments.Card.CardFragment.newInstance(card))
+            ?.addToBackStack("Selected card")
+            ?.commit()
     }
 }

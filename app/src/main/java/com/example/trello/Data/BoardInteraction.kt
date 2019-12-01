@@ -6,4 +6,5 @@ interface BoardInteraction: ListInteraction {
     fun addcard(idBoard: String, columnId: String, nameCard: String)
     fun moveCard(card: Card, toColumn: Int, toRow: Int)
     fun moveColum(idBoard: String, oldPosition: Int, newPosition: Int)
+    fun removeCard(board: Board, card: Card)
 }

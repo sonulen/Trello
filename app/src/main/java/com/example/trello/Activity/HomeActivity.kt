@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import com.example.trello.Application.TrelloApplication
 import com.example.trello.DI.ActivityComponent.ActivityComponent
 import com.example.trello.Fragments.Boards.Boards
@@ -20,6 +21,8 @@ class HomeActivity : AppCompatActivity(), ProvidesFragmentPlaceholder {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
 
         // Для активити (если его еще нет) создадим ActivityComponent
         activityComponent = TrelloApplication.get(this).getActivityComponent()
@@ -56,14 +59,30 @@ class HomeActivity : AppCompatActivity(), ProvidesFragmentPlaceholder {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
             R.id.action_search -> {
                 true
             }
             R.id.action_logout -> {
-                val intent = Intent(this, LoginActivity::class.java).apply {
-                    putExtra(EXTRAS_NAME_TO_REMOVE_ACCESS_TOKEN, "true")
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Logout?")
+
+                // Set up the buttons
+                builder.setPositiveButton(
+                    "OK"
+                ) { _, _ ->
+                    val intent = Intent(this, LoginActivity::class.java).apply {
+                        putExtra(EXTRAS_NAME_TO_REMOVE_ACCESS_TOKEN, "true")
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
+                builder.setNegativeButton(
+                    "Cancel"
+                ) { dialog, _ -> dialog.cancel() }
+                builder.show()
                 true
             }
             else -> super.onOptionsItemSelected(item)

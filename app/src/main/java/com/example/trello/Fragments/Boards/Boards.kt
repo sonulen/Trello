@@ -35,7 +35,7 @@ interface ProvidesFragmentPlaceholder {
 }
 
 interface onBoardSelectionListener {
-    fun onBoardSelectionCall(id: String)
+    fun onBoardSelectionCall(idBoard: String)
 }
 /**
  *
@@ -77,6 +77,7 @@ class Boards : Fragment(), onBoardSelectionListener {
 
         repositoryViewModel.getState().observe(this, Observer {
             when(it) {
+                RepostirotyState.NOT_INITED -> {}
                 RepostirotyState.LOADING -> {
                     showLoadingImage(view)
                 }
@@ -89,6 +90,7 @@ class Boards : Fragment(), onBoardSelectionListener {
                     view.swiperefresh.isRefreshing = false
                     Toast.makeText(view.context, "Something went wrong, swipe to refresh", Toast.LENGTH_SHORT).show()
                 }
+                else -> {}
             }
         })
 
@@ -224,7 +226,6 @@ class Boards : Fragment(), onBoardSelectionListener {
                 client = newClient
             }
     }
-
 
     override fun onBoardSelectionCall(idBoard: String) {
         var boardViewModel = repositoryViewModel.getBoardViewModel(idBoard)

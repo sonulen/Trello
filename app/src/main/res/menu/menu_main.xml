@@ -12,6 +12,7 @@
     <item
         android:id="@+id/action_logout"
         android:orderInCategory="1000"
+        android:icon="@drawable/ic_logout_foreground"
         android:title="@string/logout"
-        app:showAsAction="never" />
+        app:showAsAction="always" />
 </menu>

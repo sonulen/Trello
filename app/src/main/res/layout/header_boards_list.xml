@@ -11,11 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:textAppearance="?attr/textAppearanceListItem"
-        android:textStyle="bold"
-        android:shadowColor="#9400CCFF"
-        android:shadowRadius="1"
-        android:shadowDx="1"
-        android:shadowDy="1" />
+        android:textStyle="bold" />
 
     <View
         android:id="@+id/divider"
