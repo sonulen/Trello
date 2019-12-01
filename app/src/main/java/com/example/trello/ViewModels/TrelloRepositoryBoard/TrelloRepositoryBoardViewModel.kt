@@ -6,7 +6,7 @@ import com.example.trello.Data.BoardInteraction
 import com.example.trello.Data.Card
 
 class TrelloRepositoryBoardViewModel
-constructor(private val board: Board, private val client: BoardInteraction): ViewModel() {
+constructor(private val board: Board, private val client: BoardInteraction) {
     fun getBoardName(): String = board.name
     fun getBoardColumns() = board.lists
     fun addCard(columnId: String, nameCard: String) = client.addcard(board.id, columnId, nameCard)

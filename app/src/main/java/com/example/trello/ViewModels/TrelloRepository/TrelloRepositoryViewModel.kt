@@ -74,12 +74,10 @@ class TrelloRepositoryViewModel
     }
 
     fun getBoardViewModel(
-        idBoard: String,
-        fragment: Fragment
+        idBoard: String
     ) : TrelloRepositoryBoardViewModel? {
         var selectedBoard: Board? = repository.getBoard(idBoard) ?: return null
 
-        return ViewModelProviders
-            .of(fragment, TrelloRepositoryBoardViewModelFactory(selectedBoard!!, repository))[TrelloRepositoryBoardViewModel::class.java]
+        return TrelloRepositoryBoardViewModel(selectedBoard!!, repository)
     }
 }

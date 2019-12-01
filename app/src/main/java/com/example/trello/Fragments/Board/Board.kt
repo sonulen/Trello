@@ -3,15 +3,15 @@ package com.example.trello.Fragments.Board
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.os.Bundle
+import android.text.InputType
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.trello.Data.Card
@@ -184,7 +184,6 @@ class BoardFragment : Fragment() {
         var sortedCardsBySeq = list.cards.values.sortedBy { it.seq }
 
         for (i in  sortedCardsBySeq) {
-            val id = sCreatedItems++.toLong()
             mItemArray.add(i)
         }
 
@@ -202,13 +201,7 @@ class BoardFragment : Fragment() {
         (header.findViewById(R.id.item_count) as TextView).text = "Count of cards:" + list.cards.count()
 
         header.add_item_image.setOnClickListener { view ->
-            val id = sCreatedItems++.toLong()
-            val seq = mItemArray.count()
-            val item = Card(id.toString(), list.id, list.idBoard, "New card with № $id", seq)
-            // А как лямбды захватывают переменные? В ++ я бы так не смог без доп указаний
-            mBoardView.addItem(column, seq, item, true)
-            (header.findViewById(R.id.item_count) as TextView).text = "Count of cards:" + mItemArray.size.toString()
-            boardViewModel.addCard(list.id, item.name)
+            addButtonOnClickListener(view, mItemArray,mBoardView, column, list, header)
         }
 
         mBoardView.addColumn(
@@ -221,6 +214,76 @@ class BoardFragment : Fragment() {
             )
         )
         mColumns++
+    }
+
+    private fun addButtonOnClickListener(
+        view: View,
+        mItemArray: ArrayList<Card>,
+        mBoardView: BoardView,
+        column: Int,
+        list: List,
+        header: View
+    ) {
+        val builder = AlertDialog.Builder(view.context)
+        builder.setTitle("Create new card")
+        // Создадим layout в который уместим EditText
+        val linearLayout = LinearLayout(view.context)
+
+        val linearLayoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        linearLayout.layoutParams = linearLayoutParams
+        linearLayout.orientation = LinearLayout.VERTICAL
+        linearLayout.id = View.generateViewId()
+        linearLayout.gravity = Gravity.CENTER
+        linearLayout.setPadding(15,10,5,5)
+
+        val input = EditText(view.context)
+        input.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+        // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.hint = "Enter name here"
+        input.id = View.generateViewId()
+
+
+        // Set up the buttons
+        builder.setPositiveButton(
+            "OK"
+        ) { _, _ ->
+            if (input.text.toString().isNotEmpty()) {
+                addCard(mItemArray, mBoardView, column, list, header, input.text.toString())
+            }
+
+        }
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog, _ -> dialog.cancel() }
+
+        // Добавим на layout наш edittext
+        linearLayout.addView(input)
+
+        // Отобразим получившийся view
+        builder.setView(linearLayout)
+        builder.show()
+    }
+
+    private fun addCard(
+        mItemArray: ArrayList<Card>,
+        mBoardView: BoardView,
+        column: Int,
+        list: List,
+        header: View,
+        name: String
+    ) {
+        val id = sCreatedItems++.toLong()
+        val seq = mItemArray.count()
+        val item = Card(id.toString(), list.id, list.idBoard, name, seq)
+        mBoardView.addItem(column, seq, item, true)
+        (header.findViewById(R.id.item_count) as TextView).text = "Count of cards:" + mItemArray.size.toString()
+        boardViewModel.addCard(list.id, item.name)
     }
 
     /**

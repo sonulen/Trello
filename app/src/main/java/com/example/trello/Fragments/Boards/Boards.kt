@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.trello.Data.BoardInteraction
 import com.example.trello.Data.RepostirotyState
 import com.example.trello.Fragments.Board.BoardFragment
 import com.example.trello.Network.TrelloClient.TrelloClient
@@ -226,8 +227,7 @@ class Boards : Fragment(), onBoardSelectionListener {
 
 
     override fun onBoardSelectionCall(idBoard: String) {
-        var boardViewModel: TrelloRepositoryBoardViewModel? =
-            repositoryViewModel.getBoardViewModel(idBoard, this) ?: return
+        var boardViewModel = repositoryViewModel.getBoardViewModel(idBoard)
 
         fragmentManager?.beginTransaction()
             ?.replace(placeholder.getPlaceholderID(), BoardFragment.newInstance(boardViewModel!!))

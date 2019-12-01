@@ -6,7 +6,7 @@ import io.reactivex.Single
 
 class TrelloClient(private val service: TrelloService) {
 
-    var RETRY_COUNT: Long = 10
+    var RETRY_COUNT: Long = 0
 
     /// GET ///
     // Загружаем все команды

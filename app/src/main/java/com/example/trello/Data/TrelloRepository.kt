@@ -244,7 +244,13 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                         list.name ?: "oops",
                         uBoard.lists.count()
                     )
+
                     uBoard.add_list(new_list)
+                    // Т.к. у трелло какие то фокусы с порядковыми номерами обновим их у колонок
+                    client.updateList(new_list.id, pos = new_list.seq.toString())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({}, {_ -> state.value = RepostirotyState.FAILED })
                 }
             }
 
@@ -281,6 +287,13 @@ class TrelloRepository(private val client: TrelloClient): OrganizationInteractio
                         card.name ?: "oops", uBoard.lists[card.idList]!!.cards.count())
                     // Заносим карточку в доску
                     uBoard.lists[new_card.idList]!!.add_card(new_card)
+
+                    // Т.к. у трелло какие то фокусы с порядковыми номерами обновим их у карточек
+                    client.updateCard(new_card.id, pos = new_card.seq.toString())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe ({}, {_ -> state.value = RepostirotyState.FAILED })
+
                 }
             }
         }
